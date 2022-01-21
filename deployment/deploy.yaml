@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        app: git-diff
+    name: git-diff
+    namespace: apps
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: git-diff
+    strategy:
+        rollingUpdate:
+            maxSurge: 25%
+            maxUnavailable: 25%
+        type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                app: git-diff
+        spec:
+            containers:
+                - image: snaruto7/git-diff:v1
+                  imagePullPolicy: Always
+                  name: git-diff
+                  ports:
+                    - containerPort: 80
+            imagePullSecrets:
+                - name: docker-secret
+                    
+---
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: git-diff
+    name: git-diff
+    namespace: apps
+spec:
+    ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 80
+    selector:
+        app: git-diff
+    type: ClusterIP
